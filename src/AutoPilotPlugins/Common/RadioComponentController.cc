@@ -16,14 +16,17 @@ RadioComponentController::RadioComponentController(QObject *parent)
     // qCDebug(RadioComponentControllerLog) << Q_FUNC_INFO << this;
 
     // Channels values are in PWM
-    _calValidMinValue = 1300;
-    _calValidMaxValue = 1700;
-    _calCenterPoint= ((_calValidMaxValue - _calValidMinValue) / 2.0f) + _calValidMinValue;
+
     _calDefaultMinValue = 1000;
     _calDefaultMaxValue = 2000;
+    _calCenterPoint= ((_calDefaultMaxValue - _calDefaultMinValue) / 2.0f) + _calDefaultMinValue;
     _calRoughCenterDelta = 50;
     _calMoveDelta = 300;
     _calSettleDelta = 20;
+
+    int valueRange = _calDefaultMaxValue - _calDefaultMinValue;
+    _calValidMinValue = _calDefaultMinValue + (valueRange * 0.3f);
+    _calValidMaxValue = _calDefaultMaxValue - (valueRange * 0.3f);
 
     // Deal with parameter differences between PX4 and Ardupilot
     if (parameterExists(ParameterManager::defaultComponentId, QStringLiteral("RC1_REVERSED"))) {
