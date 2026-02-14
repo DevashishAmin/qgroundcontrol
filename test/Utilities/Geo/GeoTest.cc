@@ -119,14 +119,14 @@ void GeoTest::_convertGeodeticToEcef_test()
     const QGeoCoordinate coord(m_origin.latitude(), m_origin.longitude(), 100.0);
     const QVector3D ecef = QGCGeo::convertGeodeticToEcef(coord);
     // ECEF coordinates for ETH campus at 100m altitude
-    QVERIFY(compareDoubles(ecef.x(), 4278990.18, 1.0));
-    QVERIFY(compareDoubles(ecef.y(), 643172.29, 1.0));
-    QVERIFY(compareDoubles(ecef.z(), 4670276.60, 1.0));
+    QVERIFY(compareDoubles(static_cast<double>(ecef.x()), 4278990.18, 1.0));
+    QVERIFY(compareDoubles(static_cast<double>(ecef.y()), 643172.29, 1.0));
+    QVERIFY(compareDoubles(static_cast<double>(ecef.z()), 4670276.60, 1.0));
 }
 
 void GeoTest::_convertEcefToGeodetic_test()
 {
-    const QVector3D ecef(4278990.18, 643172.29, 4670276.60);
+    const QVector3D ecef(4278990.18f, 643172.29f, 4670276.60f);
     const QGeoCoordinate coord = QGCGeo::convertEcefToGeodetic(ecef);
     QVERIFY(coord.isValid());
     QVERIFY(compareDoubles(coord.latitude(), m_origin.latitude(), 0.0001));
@@ -139,14 +139,14 @@ void GeoTest::_convertGpsToEnu_test()
     const QGeoCoordinate coord(47.364869, 8.594398, 50.0);
     const QVector3D enu = QGCGeo::convertGpsToEnu(coord, m_origin);
     // ENU: East, North, Up (WGS84 ellipsoidal)
-    QVERIFY(compareDoubles(enu.x(), 3497.22, 1.0));   // East
-    QVERIFY(compareDoubles(enu.y(), -1280.96, 1.0));  // North
-    QVERIFY(compareDoubles(enu.z(), 48.91, 0.1));     // Up (ellipsoidal height)
+    QVERIFY(compareDoubles(static_cast<double>(enu.x()), 3497.22, 1.0));   // East
+    QVERIFY(compareDoubles(static_cast<double>(enu.y()), -1280.96, 1.0));  // North
+    QVERIFY(compareDoubles(static_cast<double>(enu.z()), 48.91, 0.1));     // Up (ellipsoidal height)
 }
 
 void GeoTest::_convertEnuToGps_test()
 {
-    const QVector3D enu(3497.22, -1280.96, 48.91);
+    const QVector3D enu(3497.22f, -1280.96f, 48.91f);
     const QGeoCoordinate coord = QGCGeo::convertEnuToGps(enu, m_origin);
     QVERIFY(coord.isValid());
     QVERIFY(compareDoubles(coord.latitude(), 47.364869, 0.0001));
@@ -162,14 +162,14 @@ void GeoTest::_convertEcefToEnu_test()
     // Then convert ECEF to ENU relative to origin
     const QVector3D enu = QGCGeo::convertEcefToEnu(ecef, m_origin);
     // Note: QVector3D uses float, so ECEF round-trips have reduced precision
-    QVERIFY(compareDoubles(enu.x(), 3497.22, 2.0));   // East
-    QVERIFY(compareDoubles(enu.y(), -1280.96, 2.0));  // North
-    QVERIFY(compareDoubles(enu.z(), 48.91, 1.0));     // Up
+    QVERIFY(compareDoubles(static_cast<double>(enu.x()), 3497.22, 2.0));   // East
+    QVERIFY(compareDoubles(static_cast<double>(enu.y()), -1280.96, 2.0));  // North
+    QVERIFY(compareDoubles(static_cast<double>(enu.z()), 48.91, 1.0));     // Up
 }
 
 void GeoTest::_convertEnuToEcef_test()
 {
-    const QVector3D enu(3497.22, -1280.96, 48.91);
+    const QVector3D enu(3497.22f, -1280.96f, 48.91f);
     const QVector3D ecef = QGCGeo::convertEnuToEcef(enu, m_origin);
     // Convert back to geodetic to verify
     // Note: QVector3D uses float, so ECEF round-trips have reduced precision
@@ -401,7 +401,7 @@ void GeoTest::_nedRoundtripProperty_test()
         // Use origin near the test coordinate
         const QGeoCoordinate origin(47.0, 8.0, 0.0);
 
-        // Generate coordinate close to origin (within ~10km)
+                // Generate coordinate close to origin (within ~10km)
         const auto latOffset = *rc::gen::inRange(-100, 100);
         const auto lonOffset = *rc::gen::inRange(-100, 100);
         const auto alt = *rc::gen::inRange(0, 1000);
@@ -410,15 +410,17 @@ void GeoTest::_nedRoundtripProperty_test()
         const double lon = origin.longitude() + (lonOffset / 1000.0);
         const QGeoCoordinate original(lat, lon, alt);
 
-        // Convert to NED
-        double n = 0, e = 0, d = 0;
+                // Convert to NED
+        double n = 0;
+        double e = 0;
+        double d = 0;
         QGCGeo::convertGeoToNed(original, origin, n, e, d);
 
-        // Convert back to Geo
+                // Convert back to Geo
         QGeoCoordinate result;
         QGCGeo::convertNedToGeo(n, e, d, origin, result);
 
-        // Should match within reasonable tolerance
+                // Should match within reasonable tolerance
         RC_ASSERT(result.isValid());
         RC_ASSERT(qAbs(result.latitude() - original.latitude()) < 0.0001);
         RC_ASSERT(qAbs(result.longitude() - original.longitude()) < 0.0001);
@@ -429,7 +431,9 @@ void GeoTest::_nedRoundtripProperty_test()
 void GeoTest::_benchmarkCoordinateConversions()
 {
     const QGeoCoordinate coord(47.364869, 8.594398, 100.0);
-    double n = 0, e = 0, d = 0;
+    double n = 0;
+    double e = 0;
+    double d = 0;
     QGeoCoordinate result;
 
     auto bench = qgc::bench::ciConfig();
@@ -471,7 +475,7 @@ void GeoTest::_qbenchmarkGeodesicDistance()
         QT_BENCHMARK_KEEP(dist);
     }
 
-    // Verify result is valid
+            // Verify result is valid
     QVERIFY(dist > 0);
 }
 

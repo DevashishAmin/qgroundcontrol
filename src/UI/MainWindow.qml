@@ -352,7 +352,7 @@ ApplicationWindow {
                 QGCToolBarButton {
                     id: qgcButton
                     height: parent.height
-                    icon.source: "/res/QGCLogoFull.svg"
+                    icon.source: "/custom/img/BattleLabLogo.svg"
                     logo: true
                     onClicked: mainWindow.showToolSelectDialog()
                 }
